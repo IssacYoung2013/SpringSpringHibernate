@@ -9,8 +9,10 @@
         http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd
-       http://www.springframework.org/schema/aop
-        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <!--激活 @Required @Autowired, JSR 250's @PostConstruct, @PreDestroy and @Resource 等标注-->
     <context:annotation-config></context:annotation-config>
@@ -22,30 +24,78 @@
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"></context:exclude-filter>
     </context:component-scan>
 
+    <mvc:resources mapping="/images/**" location="/images/"></mvc:resources>
+    <mvc:resources mapping="/img/**" location="/img/"></mvc:resources>
+    <mvc:resources mapping="/js/**" location="/js/"></mvc:resources>
+    <mvc:resources mapping="/style/**" location="/style/"></mvc:resources>
+
     <mvc:annotation-driven></mvc:annotation-driven>
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"></property>
-        <property name="prefix" value="/WEB-INF/jsps"></property>
+        <property name="prefix" value="/WEB-INF/views/"></property>
         <property name="suffix" value=".jsp"></property>
     </bean>
 
-    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
 
-    <mvc:resources mapping="/images/**" location="/images/"></mvc:resources>
-    <mvc:resources mapping="/js/**" location="/js/"></mvc:resources>
-    <mvc:resources mapping="/style/**" location="/style/"></mvc:resources>
-    <mvc:resources mapping="/img/**" location="/img/"></mvc:resources>
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"></bean>
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="cacheSeconds" value="0"></property>
+        <property name="messageConverters">
+            <list>
+                <ref bean="mappingStringHttpMessageConverter"></ref>
+                <ref bean="mappingJacksonHttpMessageConverter"></ref>
+            </list>
+        </property>
+        <property name="webBindingInitializer" ref="webBindingInitializer"></property>
+    </bean>
 
-    <!--<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"></bean>-->
-    <!--<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">-->
-        <!--<property name="cacheSeconds" value="0"></property>-->
-        <!--<property name="messageConverters">-->
-            <!--<list>-->
-                <!--<ref bean=""></ref>-->
-            <!--</list>-->
-        <!--</property>-->
-        <!--<property name=""-->
-    <!--</bean>-->
+    <bean id="mappingStringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>text/plain;charset=UTF-8</value>
+                <value>application/json;charset=UTF-8</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="mappingJacksonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <bean class="org.springframework.http.MediaType">
+                    <constructor-arg index="0" value="application"/>
+                    <constructor-arg index="1" value="json"/>
+                    <constructor-arg index="2" value="UTF-8"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+        <property name="conversionService">
+            <bean class="org.springframework.core.convert.support.DefaultConversionService"></bean>
+        </property>
+    </bean>
+
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver" id="viewResolver">
+        <property name="ignoreAcceptHeader" value="true"></property>
+        <property name="mediaTypes">
+            <map>
+                <entry key="json" value="application/json"/>
+                <entry key="xml" value="application/xml"/>
+            </map>
+        </property>
+        <property name="defaultContentType" value="text/xml"/>
+        <property name="favorParameter" value="false"/>
+        <property name="viewResolvers">
+            <list>
+                <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                    <property name="order" value="2"/>
+                    <property name="prefix" value="/WEB-INF/views/" />
+                    <property name="suffix" value=".jsp"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
 
 </beans>

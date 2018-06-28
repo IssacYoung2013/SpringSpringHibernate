@@ -1,5 +1,7 @@
 package com.issac.ssh.dao;
 
+import org.springframework.stereotype.Repository;
+
 /**
  *
  * author:  ywy

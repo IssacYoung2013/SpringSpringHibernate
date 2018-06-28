@@ -1,7 +1,15 @@
 package com.issac.ssh.service.Impl;
 
+import com.issac.base.UnitTestBase;
+import com.issac.ssh.service.AccountService;
+import com.issac.ssh.service.PersonService;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+
+import javax.annotation.Resource;
 
 import static org.junit.Assert.*;
 
@@ -13,7 +21,11 @@ import static org.junit.Assert.*;
  *
  */
 @RunWith(BlockJUnit4ClassRunner.class)
-@ContextConfiguration
-public class SpringDemo1Test {
+public class SpringDemo1Test extends UnitTestBase {
 
+    @Test
+    public void testDemo() {
+        AccountService accountService = super.getBean("accountService");
+        accountService.transfer("bbb","aaa",200d);
+    }
 }

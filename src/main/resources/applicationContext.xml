@@ -24,7 +24,8 @@
 
     <!--包扫描-->
     <context:component-scan base-package="com">
-        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"></context:exclude-filter>
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller"></context:exclude-filter>
     </context:component-scan>
 
     <!--数据源 配置连接池-->
@@ -33,6 +34,7 @@
         <property name="url" value="${jdbc.url}"></property>
         <property name="username" value="${jdbc.username}"></property>
         <property name="password" value="${jdbc.password}"></property>
+
     </bean>
 
     <!--Hibernate Session-->
@@ -49,8 +51,16 @@
                 <prop key="hibernate.cache.use_second_level_cache">false</prop>
                 <prop key="hibernate.cache.use_query_cache">false</prop>
                 <prop key="current_session_context_class">thread</prop>
-                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate4.SpringSessionContext</prop>
+                <prop key="hibernate.current_session_context_class">
+                    org.springframework.orm.hibernate4.SpringSessionContext
+                </prop>
 
+                <prop key="hibernate.c3p0.min_size">5</prop>
+                <prop key="hibernate.c3p0.max_size">100</prop>
+                <prop key="hibernate.c3p0.timeout">300</prop>
+                <prop key="hibernate.c3p0.max_statements">50</prop>
+                <prop key="hibernate.c3p0.idle_test_period">60</prop>
+                <prop key="hibernate.c3p0.acquire_increment">2</prop>
             </props>
         </property>
 
@@ -58,14 +68,24 @@
             <list>
                 <value>com.issac.ssh.entity</value>
             </list>
+
         </property>
     </bean>
 
     <!-- 事务管理 -->
-    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
-        <property name="sessionFactory" ref="sessionFactory"></property>
+    <!--<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">-->
+    <!--<property name="sessionFactory" ref="sessionFactory"></property>-->
+    <!--</bean>-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
     </bean>
 
+    <!--事务管理模板:spring为了简化事务管理的代码而提供的类-->
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <!--配置事务的通知：事务的增强-->
     <tx:advice id="txAdvice" transaction-manager="transactionManager">
         <tx:attributes>
             <tx:method name="get*" read-only="true" propagation="REQUIRED"/>
@@ -75,8 +95,10 @@
         </tx:attributes>
     </tx:advice>
 
-    <aop:config proxy-target-class="true">
-        <aop:advisor advice-ref="txAdvice" pointcut="execution(public * com.issac.*.service.*Service.*(..))"/>
-    </aop:config>
+    <!--<aop:config proxy-target-class="true">-->
+        <!--<aop:advisor advice-ref="txAdvice" pointcut="execution(public * com.issac.*.service.*Service.*(..))"/>-->
+    <!--</aop:config>-->
 
+    <!--开启注解事务-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
 </beans>

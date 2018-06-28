@@ -1,5 +1,7 @@
 package com.issac.ssh.service;
 
+import org.springframework.stereotype.Service;
+
 /**
  *  转账案例的业务接口
  * author:  ywy
